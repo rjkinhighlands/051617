@@ -1,0 +1,145 @@
+// This illustrates how to build a Menu from JSON data. The data object below contains an array of objects, 
+// each containing “id”, “parentid”, and “text” members. 
+// The “text” member is the menu item’s text, the id and parentid members specify the hierarchical structure.
+
+var data = [
+{
+    "text": "Chocolate Beverage",
+    "id": "1",
+    "parentid": "-1"
+}, {
+    "id": "2",
+    "parentid": "1",
+    "text": "Hot Chocolate"
+}, {
+    "id": "3",
+    "parentid": "1",
+    "text": "Peppermint Hot Chocolate"
+}, {
+    "id": "4",
+    "parentid": "1",
+    "text": "Salted Caramel Hot Chocolate"
+}, {
+    "id": "5",
+    "parentid": "1",
+    "text": "White Hot Chocolate"
+}, {
+    "id": "6",
+    "text": "Espresso Beverage",
+    "parentid": "-1"
+}, {
+    "id": "7",
+    "parentid": "6",
+    "text": "Caffe Americano"
+}, {
+    "id": "8",
+    "text": "Caffe Latte",
+    "parentid": "6"
+}, {
+    "id": "9",
+    "text": "Caffe Mocha",
+    "parentid": "6"
+}, {
+    "id": "10",
+    "text": "Cappuccino",
+    "parentid": "6"
+}, {
+    "id": "11",
+    "text": "Pumpkin Spice Latte",
+    "parentid": "6"
+}, {
+    "id": "12",
+    "text": "Frappuccino",
+    "parentid": "-1"
+}, {
+    "id": "13",
+    "text": "Caffe Vanilla Frappuccino",
+    "parentid": "12"
+}, {
+    "id": "15",
+    "text": "450 calories",
+    "parentid": "13"
+}, {
+    "id": "16",
+    "text": "16g fat",
+    "parentid": "13"
+}, {
+    "id": "17",
+    "text": "13g protein",
+    "parentid": "13"
+}, {
+    "id": "14",
+    "text": "Caffe Vanilla Frappuccino Light",
+    "parentid": "12"
+}]
+
+// As a first step, we will create a function that builds the hierarchical structure. 
+// The builddata function below, iterates through the data and creates the source object. 
+// The sub items of each item are added to its “items” member. The item’s text is stored in a “label” member. 
+
+var builddata = function () {
+    var source = [];
+    var items = [];
+
+// build hierarchical source.
+
+    for (i = 0; i < data.length; i++) {
+        var item = data[i];
+        var label = item["text"];
+        var parentid = item["parentid"];
+        var id = item["id"];
+
+        if (items[parentid]) {
+            var item = { parentid: parentid, label: label, item: item };
+            if (!items[parentid].items) {
+                items[parentid].items = [];
+            }
+            items[parentid].items[items[parentid].items.length] = item;
+            items[id] = item;
+        }
+        else {
+            items[id] = { parentid: parentid, label: label, item: item };
+            source[id] = items[id];
+        }
+    }
+    return source;
+}
+var source = builddata();
+
+// The next step is to create a recursive function that traverses the source object and dynamically appends UL and LI elements. 
+
+var buildUL = function (parent, items) {
+    $.each(items, function () {
+        if (this.label) {
+
+// create LI element and append it to the parent element.
+
+            var li = $("<li>" + this.label + "</li>");
+            li.appendTo(parent);
+
+// if there are sub items, call the buildUL function.
+
+            if (this.items && this.items.length > 0) {
+                var ul = $("<ul></ul>");
+                ul.appendTo(li);
+                buildUL(ul, this.items);
+            }
+        }
+    });
+}
+var ul = $("<ul></ul>");
+ul.appendTo("#jqxMenu");
+buildUL(ul, source);
+
+// After that, we use the script below to create the Menu
+
+$("#jqxMenu").jqxMenu({ width: '600', height: '30px'});
+
+// Finally, we add a DIV element with id=’jqxMenu’ to the document’s body.
+
+<div id ='jqxMenu'>
+</div>
+
+ // You can also build a Tree from the above code. In order to achieve that, you need to use the jqxTree constructor.
+
+ // $("#jqxMenu").jqxTree({ width: '300', height: '300px'});
